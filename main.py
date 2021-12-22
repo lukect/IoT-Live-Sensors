@@ -50,8 +50,8 @@ async def reboot():
     return {"reboot": 1}
 
 
-sensor = Adafruit_DHT.DHT11
-sensor_pin = 11
+sensor = Adafruit_DHT.DHT22
+sensor_pin = 22
 
 
 def read_sensors():
