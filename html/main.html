@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Live Sensor</title>
+
+    <style>
+        html, body {
+            background-color: lightgray;
+            text-align: center;
+            font-family: Tahoma, Helvetica Neue, Helvetica, sans-serif, SansSerif, Arial;
+        }
+
+        p {
+            font-size: 5mm;
+        }
+
+        #main {
+            background-color: white;
+            padding: 40px 10px;
+            width: clamp(20rem, 30rem, 90vw);
+            box-shadow: 5px 5px 5px rgba(33, 33, 33, .3);
+
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            -ms-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+
+        #main:hover {
+            box-shadow: 10px 10px 10px rgba(33, 33, 33, .3);
+        }
+
+        table, th, td {
+            border: 2px solid #505050;
+            border-collapse: collapse;
+            font-size: 5mm;
+            margin-left: auto;
+            margin-right: auto;
+            width: 70%;
+        }
+
+        th, td {
+            width: 50%;
+            height: 2em;
+        }
+
+        th {
+            background-color: #d2d2d2;
+        }
+
+        td {
+            background-color: #f1f1f1;
+        }
+    </style>
+    <script>
+        function get_data() {
+            const req = new XMLHttpRequest();
+            req.onreadystatechange = function () {
+                if (req.readyState === 4) {
+                    const connection_lost = document.getElementById("connection_lost");
+                    if (req.status === 200) {
+                        connection_lost.style.display = "none";
+                        const json_res = JSON.parse(req.responseText);
+                        const temp = document.getElementById("temp");
+                        const humid = document.getElementById("humid");
+                        if (json_res.temp == null) {
+                            temp.style.color = "red";
+                            temp.innerText = "Error";
+                        } else {
+                            temp.style.color = "black";
+                            temp.innerText = json_res.temp.toString() + "°C";
+                        }
+                        if (json_res.humid == null) {
+                            humid.style.color = "red";
+                            humid.innerText = "Error";
+                        } else {
+                            humid.style.color = "black";
+                            humid.innerText = json_res.humid.toString() + "%";
+                        }
+                    } else {
+                        connection_lost.style.display = "block";
+                    }
+                    setTimeout(get_data, 500);
+                }
+            }
+            req.timeout = 1000;
+            req.open("GET", "/sensor/data", true);
+            req.send(null);
+        }
+    </script>
+</head>
+<body onload="get_data()">
+<div id="main">
+    <h1>Live Sensor</h1>
+    <table id="table" class="table">
+        <tr>
+            <th>Temperature</th>
+            <th>Humidity</th>
+        </tr>
+        <tr>
+            {% if temp is not none %}
+            <td id="temp">{{ temp }}°C</td>
+            {% else %}
+            <td id="temp" style="color: red">Error</td>
+            {% endif %}
+            {% if humid is not none %}
+            <td id="humid">{{ humid }}%</td>
+            {% else %}
+            <td id="humid" style="color: red">Error</td>
+            {% endif %}
+        </tr>
+    </table>
+    <p id="connection_lost" style="color: red; display: none">Connection lost!<br>Attempting to reconnect...</p>
+    <noscript>
+        <p style="color: red">Please enable JavaScript for live updates!</p>
+    </noscript>
+</div>
+</body>
+</html>
