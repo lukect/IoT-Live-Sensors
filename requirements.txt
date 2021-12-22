@@ -1,3 +1,4 @@
 fastapi~=0.70.1
 uvicorn~=0.16.0
 jinja2~=3.0.3
+Adafruit_DHT~=1.4.0

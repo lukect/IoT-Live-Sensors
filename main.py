@@ -1,7 +1,8 @@
-from random import randrange
+import subprocess
 from threading import Thread
 from time import sleep
 
+import Adafruit_DHT
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -37,13 +38,28 @@ def format1dp(num):
         return None
 
 
+@app.get("/shutdown")
+async def shutdown():
+    subprocess.Popen("sleep 1 ; sudo shutdown -h now", shell=True)
+    return {"shutdown": 1}
+
+
+@app.get("/reboot")
+async def reboot():
+    subprocess.Popen("sleep 1 ; sudo shutdown -r now", shell=True)
+    return {"reboot": 1}
+
+
+sensor = Adafruit_DHT.DHT11
+sensor_pin = 11
+
+
 def read_sensors():
     global temperature
     global humidity
     while True:
-        temperature = randrange(100, 400) / 10
-        humidity = randrange(0, 1000) / 10
-        sleep(1)
+        humidity, temperature = Adafruit_DHT.read(sensor, sensor_pin)
+        sleep(2)
 
 
 sensor_thread = Thread(name='read_sensors', target=read_sensors)
